@@ -7,20 +7,22 @@
 }
 
 :root {
-  --bg-base: #1e1e1e;
-  --bg-sidebar: #252525;
-  --bg-pane: #1e1e1e;
-  --bg-hover: #2a2a2a;
-  --bg-active: #373a40;
-  --border: #333333;
-  --text: #dcddde;
-  --text-muted: #999999;
-  --text-faint: #666666;
-  --accent: #7f6df2;
-  --accent-hover: #9485f4;
-  --wiki-link: #7f6df2;
-  --wiki-unresolved: #e06c75;
-  --code-bg: #2d2d2d;
+  /* Gruvbox dark palette — accents mirror the dump-it logo (orange + aqua) */
+  --bg-base: #282828;
+  --bg-sidebar: #32302f;
+  --bg-pane: #282828;
+  --bg-hover: #3c3836;
+  --bg-active: #504945;
+  --border: #3c3836;
+  --text: #ebdbb2;
+  --text-muted: #a89984;
+  --text-faint: #7c6f64;
+  --accent: #fe8019;
+  --accent-hover: #fabd2f;
+  --accent-ink: #1d2021;
+  --wiki-link: #8ec07c;
+  --wiki-unresolved: #fb4934;
+  --code-bg: #3c3836;
   --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
 }
@@ -143,6 +145,38 @@ body {
   font-size: 13px;
 }
 
+/* ── Sidebar tabs (Files / Tags) ── */
+
+.sidebar-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px 0;
+}
+
+.sidebar-tab {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sidebar-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.sidebar-tab.active {
+  background: var(--bg-active);
+  color: var(--accent);
+  border-color: var(--border);
+}
+
 /* ── File tree ── */
 
 .file-tree {
@@ -192,6 +226,74 @@ body {
 
 .tree-folder-label {
   font-weight: 500;
+}
+
+/* ── Tags ── */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  align-content: flex-start;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-hover);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tag-pill:hover {
+  border-color: var(--wiki-link);
+  color: var(--wiki-link);
+}
+
+.tag-hash {
+  color: var(--text-faint);
+}
+
+.tag-count {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.tag-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tag-back {
+  align-self: flex-start;
+  margin: 8px 10px 2px;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.tag-back:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.tag-detail-title {
+  padding: 4px 14px 8px;
+  color: var(--wiki-link);
+  font-weight: 600;
+  font-size: 13px;
 }
 
 /* ── Workspace ── */
@@ -456,6 +558,121 @@ body.is-resizing {
   margin-top: 16px;
 }
 
+/* ── Search modal ── */
+
+.search-modal {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+
+.search-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px 0;
+}
+
+.search-input {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-base);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.search-scope {
+  display: flex;
+  gap: 6px;
+}
+
+.scope-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.scope-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.scope-btn.active {
+  background: var(--bg-active);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.scope-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.search-results {
+  overflow-y: auto;
+  padding: 8px 8px 16px;
+  flex: 1;
+}
+
+.search-result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  margin: 2px 0;
+}
+
+.search-result:hover {
+  background: var(--bg-hover);
+}
+
+.search-result-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.search-result-vault {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--wiki-link);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.search-result-snippet {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .editor-pane,
 .preview-pane {
   display: flex;
@@ -665,7 +882,7 @@ body.is-resizing {
 .btn-primary {
   padding: 8px 16px;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
   border: none;
 }
 
@@ -702,5 +919,5 @@ body.is-resizing {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: #54504a;
 }

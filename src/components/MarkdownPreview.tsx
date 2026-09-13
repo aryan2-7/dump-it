@@ -1,7 +1,8 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import type { FlatFile } from "../types";
-import { preprocessWikiLinks, resolveWikiLink } from "../utils/wikiLinks";
+import { hasScheme, preprocessWikiLinks, resolveWikiLink } from "../utils/wikiLinks";
 
 interface MarkdownPreviewProps {
   content: string;
@@ -22,7 +23,10 @@ export function MarkdownPreview({ content, files, onWikiLinkClick }: MarkdownPre
           remarkPlugins={[remarkGfm]}
           components={{
             a: ({ href, children }) => {
-              if (href?.startsWith("wiki://")) {
+              if (!href) return <span>{children}</span>;
+
+              // Wiki-style [[links]], preprocessed into wiki:// pseudo-urls.
+              if (href.startsWith("wiki://")) {
                 const target = decodeURIComponent(href.slice("wiki://".length));
                 const resolved = resolveWikiLink(target, files);
                 return (
@@ -36,8 +40,39 @@ export function MarkdownPreview({ content, files, onWikiLinkClick }: MarkdownPre
                   </button>
                 );
               }
+
+              // Plain relative markdown links that happen to point at a note
+              // in the vault (e.g. "[Getting Started](Getting Started.md)")
+              // should navigate inside the app instead of leaving it.
+              if (!hasScheme(href)) {
+                const decoded = decodeURIComponent(href.split(/[?#]/)[0]);
+                const base = decoded.split(/[/\\]/).pop() ?? decoded;
+                const resolved = resolveWikiLink(base, files);
+                if (resolved) {
+                  return (
+                    <button
+                      type="button"
+                      className="wiki-link"
+                      onClick={() => onWikiLinkClick(resolved.path)}
+                      title={resolved.path}
+                    >
+                      {children}
+                    </button>
+                  );
+                }
+              }
+
+              // Everything else (http/https/mailto/unresolved relative links)
+              // is opened with the OS default handler instead of navigating
+              // the app's own webview away from the note.
               return (
-                <a href={href} target="_blank" rel="noreferrer">
+                <a
+                  href={href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openUrl(href).catch(() => {});
+                  }}
+                >
                   {children}
                 </a>
               );

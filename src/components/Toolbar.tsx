@@ -6,6 +6,7 @@ interface ToolbarProps {
   shortcuts: ShortcutMap;
   onTogglePreview: () => void;
   onNewNote: () => void;
+  onOpenSearch: () => void;
   onOpenShortcuts: () => void;
 }
 
@@ -14,6 +15,7 @@ export function Toolbar({
   shortcuts,
   onTogglePreview,
   onNewNote,
+  onOpenSearch,
   onOpenShortcuts,
 }: ToolbarProps) {
   return (
@@ -33,6 +35,14 @@ export function Toolbar({
         title={`New note (${formatShortcut(shortcuts.newNote)})`}
       >
         + New
+      </button>
+      <button
+        type="button"
+        className="toolbar-btn"
+        onClick={onOpenSearch}
+        title={`Search (${formatShortcut(shortcuts.search)})`}
+      >
+        Search
       </button>
       <div className="toolbar-spacer" />
       <button

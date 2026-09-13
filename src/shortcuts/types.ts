@@ -4,7 +4,8 @@ export type ActionId =
   | "openVault"
   | "saveNote"
   | "openShortcutManager"
-  | "toggleSidebar";
+  | "toggleSidebar"
+  | "search";
 
 export interface ShortcutBinding {
   key: string;

@@ -22,7 +22,16 @@ export function resolveWikiLink(link: string, files: FlatFile[]): FlatFile | und
 }
 
 export function preprocessWikiLinks(content: string): string {
-  return content.replace(/\[\[([^\]|]+)(\|[^\]]+)?\]\]/g, (_match, target: string) => {
-    return `[${target}](wiki://${encodeURIComponent(target.trim())})`;
-  });
+  return content.replace(
+    /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
+    (_match, target: string, alias?: string) => {
+      const label = (alias ?? target).trim();
+      return `[${label}](wiki://${encodeURIComponent(target.trim())})`;
+    },
+  );
+}
+
+/** True if a URL has an explicit scheme (http:, mailto:, wiki:, etc). */
+export function hasScheme(href: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:/i.test(href);
 }

@@ -1,19 +1,18 @@
+import { useState } from "react";
 import { FileTree } from "./FileTree";
-import type { FileEntry } from "../types";
+import { TagList } from "./TagList";
+import type { FileEntry, FlatFile } from "../types";
+import { basename } from "../utils/paths";
 
 interface SidebarProps {
   width: number;
   vaultPath: string | null;
   tree: FileEntry[];
   activeFile: string | null;
+  tagIndex: Map<string, FlatFile[]>;
   onOpenVault: () => void;
   onSelectFile: (path: string) => void;
   onNewNote: () => void;
-}
-
-function vaultLabel(path: string): string {
-  const parts = path.split(/[/\\]/);
-  return parts[parts.length - 1] || path;
 }
 
 export function Sidebar({
@@ -21,10 +20,14 @@ export function Sidebar({
   vaultPath,
   tree,
   activeFile,
+  tagIndex,
   onOpenVault,
   onSelectFile,
   onNewNote,
 }: SidebarProps) {
+  const [view, setView] = useState<"files" | "tags">("files");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
   return (
     <aside className="sidebar" style={{ width }}>
       <div className="sidebar-header">
@@ -38,7 +41,7 @@ export function Sidebar({
         <>
           <div className="sidebar-actions">
             <div className="vault-name" title={vaultPath}>
-              {vaultLabel(vaultPath)}
+              {basename(vaultPath)}
             </div>
             <button
               type="button"
@@ -49,16 +52,44 @@ export function Sidebar({
               +
             </button>
           </div>
+
+          <div className="sidebar-tabs">
+            <button
+              type="button"
+              className={`sidebar-tab${view === "files" ? " active" : ""}`}
+              onClick={() => setView("files")}
+            >
+              Files
+            </button>
+            <button
+              type="button"
+              className={`sidebar-tab${view === "tags" ? " active" : ""}`}
+              onClick={() => setView("tags")}
+            >
+              Tags{tagIndex.size > 0 ? ` (${tagIndex.size})` : ""}
+            </button>
+          </div>
+
           <div className="sidebar-tree">
-            {tree.length === 0 ? (
-              <div className="sidebar-empty-state">
-                <p className="sidebar-empty">No markdown files yet</p>
-                <button type="button" className="btn-primary btn-sm" onClick={onNewNote}>
-                  Create first note
-                </button>
-              </div>
+            {view === "files" ? (
+              tree.length === 0 ? (
+                <div className="sidebar-empty-state">
+                  <p className="sidebar-empty">No markdown files yet</p>
+                  <button type="button" className="btn-primary btn-sm" onClick={onNewNote}>
+                    Create first note
+                  </button>
+                </div>
+              ) : (
+                <FileTree entries={tree} activeFile={activeFile} onSelect={onSelectFile} />
+              )
             ) : (
-              <FileTree entries={tree} activeFile={activeFile} onSelect={onSelectFile} />
+              <TagList
+                tagIndex={tagIndex}
+                selectedTag={selectedTag}
+                onSelectTag={setSelectedTag}
+                activeFile={activeFile}
+                onSelectFile={onSelectFile}
+              />
             )}
           </div>
         </>

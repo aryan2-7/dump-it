@@ -31,6 +31,11 @@ export const SHORTCUT_ACTIONS: ShortcutAction[] = [
     label: "Shortcut Manager",
     description: "Open the keyboard shortcuts settings",
   },
+  {
+    id: "search",
+    label: "Search",
+    description: "Search notes across this vault or all vaults",
+  },
 ];
 
 export const DEFAULT_SHORTCUTS: ShortcutMap = {
@@ -40,6 +45,7 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
   openVault: { key: "o", mod: true, shift: true, alt: false },
   toggleSidebar: { key: "b", mod: true, shift: false, alt: false },
   openShortcutManager: { key: ",", mod: true, shift: false, alt: false },
+  search: { key: "f", mod: true, shift: true, alt: false },
 };
 
 export const SHORTCUTS_STORAGE_KEY = "dump-it-shortcuts";

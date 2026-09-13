@@ -6,18 +6,41 @@ import { flattenFiles } from "../utils/wikiLinks";
 import { joinPath, parentDir, sanitizeFileName } from "../utils/paths";
 
 const VAULT_KEY = "dump-it-vault-path";
+const RECENT_VAULTS_KEY = "dump-it-recent-vaults";
+const MAX_RECENT_VAULTS = 8;
+
+function loadRecentVaults(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_VAULTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((p) => typeof p === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 export function useVault() {
   const [vaultPath, setVaultPath] = useState<string | null>(() =>
     localStorage.getItem(VAULT_KEY),
   );
+  const [recentVaults, setRecentVaults] = useState<string[]>(loadRecentVaults);
   const [tree, setTree] = useState<FileEntry[]>([]);
   const [flatFiles, setFlatFiles] = useState<FlatFile[]>([]);
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [content, setContent] = useState("");
   const [savedContent, setSavedContent] = useState("");
+  const [fileContents, setFileContents] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const addRecentVault = useCallback((path: string) => {
+    setRecentVaults((prev) => {
+      const next = [path, ...prev.filter((p) => p !== path)].slice(0, MAX_RECENT_VAULTS);
+      localStorage.setItem(RECENT_VAULTS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const refreshTree = useCallback(async (path: string) => {
     const entries = await invoke<FileEntry[]>("list_vault", { vaultPath: path });
@@ -46,6 +69,7 @@ export function useVault() {
     try {
       setVaultPath(selected);
       localStorage.setItem(VAULT_KEY, selected);
+      addRecentVault(selected);
       await refreshTree(selected);
       setActiveFile(null);
       setContent("");
@@ -53,7 +77,28 @@ export function useVault() {
     } finally {
       setLoading(false);
     }
-  }, [flushSave, refreshTree]);
+  }, [flushSave, refreshTree, addRecentVault]);
+
+  const switchVault = useCallback(
+    async (path: string) => {
+      if (path === vaultPath) return;
+      await flushSave();
+
+      setLoading(true);
+      try {
+        setVaultPath(path);
+        localStorage.setItem(VAULT_KEY, path);
+        addRecentVault(path);
+        await refreshTree(path);
+        setActiveFile(null);
+        setContent("");
+        setSavedContent("");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [vaultPath, flushSave, refreshTree, addRecentVault],
+  );
 
   const openFile = useCallback(
     async (path: string) => {
@@ -129,15 +174,56 @@ export function useVault() {
     };
   }, []);
 
+  // Keep a content cache for the whole vault, used to power tag parsing and
+  // search. Loaded once per vault (files list change) then kept live for
+  // whichever file is being edited.
+  useEffect(() => {
+    if (flatFiles.length === 0) {
+      setFileContents({});
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      const entries = await Promise.all(
+        flatFiles.map(async (f) => {
+          try {
+            const text = await invoke<string>("read_file", { path: f.path });
+            return [f.path, text] as const;
+          } catch {
+            return [f.path, ""] as const;
+          }
+        }),
+      );
+      if (!cancelled) setFileContents(Object.fromEntries(entries));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [flatFiles]);
+
+  useEffect(() => {
+    if (!activeFile) return;
+    setFileContents((prev) => {
+      if (prev[activeFile] === content) return prev;
+      return { ...prev, [activeFile]: content };
+    });
+  }, [activeFile, content]);
+
   return {
     vaultPath,
+    recentVaults,
     tree,
     flatFiles,
+    fileContents,
     activeFile,
     content,
     loading,
     isDirty,
     openVault,
+    switchVault,
     openFile,
     updateContent,
     createFile,

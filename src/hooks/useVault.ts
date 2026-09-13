@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { FileEntry, FlatFile } from "../types";
 import { flattenFiles } from "../utils/wikiLinks";
+import { joinPath, parentDir, sanitizeFileName } from "../utils/paths";
 
 const VAULT_KEY = "dump-it-vault-path";
 
@@ -24,7 +25,16 @@ export function useVault() {
     setFlatFiles(flattenFiles(entries));
   }, []);
 
+  const flushSave = useCallback(async () => {
+    if (!activeFile || content === savedContent) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    await invoke("write_file", { path: activeFile, content });
+    setSavedContent(content);
+  }, [activeFile, content, savedContent]);
+
   const openVault = useCallback(async () => {
+    await flushSave();
+
     const selected = await open({
       directory: true,
       multiple: false,
@@ -43,26 +53,26 @@ export function useVault() {
     } finally {
       setLoading(false);
     }
-  }, [refreshTree]);
+  }, [flushSave, refreshTree]);
 
-  const openFile = useCallback(async (path: string) => {
-    if (path === activeFile && content === savedContent) return;
+  const openFile = useCallback(
+    async (path: string) => {
+      if (path === activeFile) return;
 
-    if (activeFile && content !== savedContent) {
-      await invoke("write_file", { path: activeFile, content });
-      setSavedContent(content);
-    }
+      await flushSave();
 
-    setLoading(true);
-    try {
-      const text = await invoke<string>("read_file", { path });
-      setActiveFile(path);
-      setContent(text);
-      setSavedContent(text);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeFile, content, savedContent]);
+      setLoading(true);
+      try {
+        const text = await invoke<string>("read_file", { path });
+        setActiveFile(path);
+        setContent(text);
+        setSavedContent(text);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [activeFile, flushSave],
+  );
 
   const updateContent = useCallback(
     (value: string) => {
@@ -76,6 +86,31 @@ export function useVault() {
       }, 800);
     },
     [activeFile],
+  );
+
+  const createFile = useCallback(
+    async (name: string, folderPath?: string) => {
+      if (!vaultPath) return null;
+
+      await flushSave();
+
+      const sanitized = sanitizeFileName(name);
+      const dir = folderPath ?? (activeFile ? parentDir(activeFile) : vaultPath);
+      const path = joinPath(dir, `${sanitized}.md`);
+      const title = sanitized.replace(/-/g, " ");
+      const initial = `# ${title}\n\n`;
+
+      setLoading(true);
+      try {
+        await invoke("create_file", { path, content: initial });
+        await refreshTree(vaultPath);
+        await openFile(path);
+        return path;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [vaultPath, activeFile, flushSave, refreshTree, openFile],
   );
 
   const isDirty = content !== savedContent;
@@ -105,6 +140,8 @@ export function useVault() {
     openVault,
     openFile,
     updateContent,
+    createFile,
+    saveNow: flushSave,
     refreshTree,
   };
 }

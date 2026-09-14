@@ -12,7 +12,13 @@ current status: simple MD editor and viewer
 make sure u have tauri installed tho
 
 ## demo screenshot
-<img width="1392" height="912" alt="image" src="https://github.com/user-attachments/assets/12381b10-5d57-4bae-91fd-9b9561a27172" />
+
+- Default Theme
+<img width="1392" height="912" alt="image" src="https://github.com/user-attachments/assets/4634b445-662d-4156-8c67-b93e66c05208" />
+
+- Gruvbox Theme
+<img width="1392" height="912" alt="image" src="https://github.com/user-attachments/assets/da388cb3-d1da-4f0c-ab4f-fc8e473082b5" />
+
 
 
 note: it's developed mainly for macOS rn, so idk how it will work on other operating systems

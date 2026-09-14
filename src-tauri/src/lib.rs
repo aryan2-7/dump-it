@@ -70,12 +70,24 @@ fn write_file(path: &str, content: &str) -> Result<(), String> {
     fs::write(path, content).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn create_file(path: &str, content: &str) -> Result<(), String> {
+    let file_path = Path::new(path);
+    if file_path.exists() {
+        return Err("File already exists".into());
+    }
+    if let Some(parent) = file_path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    fs::write(file_path, content).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![list_vault, read_file, write_file])
+        .invoke_handler(tauri::generate_handler![list_vault, read_file, write_file, create_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

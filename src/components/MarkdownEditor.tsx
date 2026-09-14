@@ -1,3 +1,6 @@
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { RevealIcon } from "./icons";
+
 interface MarkdownEditorProps {
   content: string;
   fileName: string | null;
@@ -21,6 +24,16 @@ export function MarkdownEditor({ content, fileName, isDirty, onChange }: Markdow
       <div className="pane-header">
         <span className="pane-title">{label}</span>
         {isDirty && <span className="dirty-dot" title="Unsaved changes" />}
+        <div className="toolbar-spacer" />
+        <button
+          type="button"
+          className="btn-icon icon-tooltip"
+          onClick={() => revealItemInDir(fileName).catch(() => {})}
+          data-tooltip="Reveal in file manager"
+          aria-label="Reveal in file manager"
+        >
+          <RevealIcon />
+        </button>
       </div>
       <textarea
         className="markdown-editor"

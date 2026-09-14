@@ -7,19 +7,17 @@ import {
 } from "../shortcuts/format";
 import type { ActionId, ShortcutMap } from "../shortcuts/types";
 
-interface ShortcutManagerProps {
+interface KeyboardShortcutsPanelProps {
   shortcuts: ShortcutMap;
   onChange: (shortcuts: ShortcutMap) => void;
   onReset: () => void;
-  onClose: () => void;
 }
 
-export function ShortcutManager({
+export function KeyboardShortcutsPanel({
   shortcuts,
   onChange,
   onReset,
-  onClose,
-}: ShortcutManagerProps) {
+}: KeyboardShortcutsPanelProps) {
   const [recording, setRecording] = useState<ActionId | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,55 +54,44 @@ export function ShortcutManager({
   }, [recording, shortcuts, onChange]);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal shortcut-manager" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Keyboard Shortcuts</h2>
-          <button type="button" className="btn-icon" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
+    <div className="settings-panel">
+      <div className="settings-panel-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button type="button" className="btn-ghost btn-sm" onClick={onReset}>
+          Reset to defaults
+        </button>
+      </div>
 
-        <p className="modal-hint">
-          Click a shortcut to rebind it. Press Esc to cancel recording.
-        </p>
+      <p className="modal-hint">
+        Click a shortcut to rebind it. Press Esc to cancel recording.
+      </p>
 
-        {error && <p className="modal-error">{error}</p>}
+      {error && <p className="modal-error">{error}</p>}
 
-        <div className="shortcut-list">
-          {SHORTCUT_ACTIONS.map((action) => {
-            const binding = shortcuts[action.id];
-            const isRecording = recording === action.id;
+      <div className="shortcut-list">
+        {SHORTCUT_ACTIONS.map((action) => {
+          const binding = shortcuts[action.id];
+          const isRecording = recording === action.id;
 
-            return (
-              <div key={action.id} className="shortcut-row">
-                <div className="shortcut-info">
-                  <span className="shortcut-label">{action.label}</span>
-                  <span className="shortcut-desc">{action.description}</span>
-                </div>
-                <button
-                  type="button"
-                  className={`shortcut-key${isRecording ? " recording" : ""}`}
-                  onClick={() => {
-                    setRecording(action.id);
-                    setError(null);
-                  }}
-                >
-                  {isRecording ? "Press keys…" : formatShortcut(binding)}
-                </button>
+          return (
+            <div key={action.id} className="shortcut-row">
+              <div className="shortcut-info">
+                <span className="shortcut-label">{action.label}</span>
+                <span className="shortcut-desc">{action.description}</span>
               </div>
-            );
-          })}
-        </div>
-
-        <div className="modal-footer">
-          <button type="button" className="btn-ghost" onClick={onReset}>
-            Reset to defaults
-          </button>
-          <button type="button" className="btn-primary" onClick={onClose}>
-            Done
-          </button>
-        </div>
+              <button
+                type="button"
+                className={`shortcut-key${isRecording ? " recording" : ""}`}
+                onClick={() => {
+                  setRecording(action.id);
+                  setError(null);
+                }}
+              >
+                {isRecording ? "Press keys…" : formatShortcut(binding)}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

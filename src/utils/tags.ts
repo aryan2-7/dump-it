@@ -1,62 +1,13 @@
 import type { FlatFile } from "../types";
-
-interface FrontmatterBlock {
-  block: string;
-  rest: string;
-}
-
-function extractFrontmatterBlock(content: string): FrontmatterBlock | null {
-  if (!content.startsWith("---")) return null;
-  const end = content.indexOf("\n---", 3);
-  if (end === -1) return null;
-  const block = content.slice(3, end);
-  const restStart = content.indexOf("\n", end + 4);
-  const rest = restStart === -1 ? "" : content.slice(restStart + 1);
-  return { block, rest };
-}
-
-function parseFrontmatterTags(block: string): string[] {
-  const lines = block.split("\n");
-  const tags: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    const inline = line.match(/^\s*tags:\s*\[(.*)\]\s*$/i);
-    if (inline) {
-      tags.push(
-        ...inline[1]
-          .split(",")
-          .map((t) => t.trim().replace(/^["']|["']$/g, ""))
-          .filter(Boolean),
-      );
-      continue;
-    }
-
-    if (/^\s*tags:\s*$/i.test(line)) {
-      let j = i + 1;
-      while (j < lines.length && /^\s*-\s*\S/.test(lines[j])) {
-        tags.push(
-          lines[j]
-            .replace(/^\s*-\s*/, "")
-            .trim()
-            .replace(/^["']|["']$/g, ""),
-        );
-        j++;
-      }
-    }
-  }
-
-  return tags;
-}
+import { extractFrontmatter, parseFrontmatterTags } from "./frontmatter";
 
 const TAG_REGEX = /(^|\s)#([A-Za-z][\w\-/]*)/g;
 
 /** Extracts unique lowercase tags from a note's content (frontmatter `tags:` + inline `#tags`). */
 export function parseTags(content: string): string[] {
   const tags = new Set<string>();
-  const fm = extractFrontmatterBlock(content);
-  const body = fm ? fm.rest : content;
+  const fm = extractFrontmatter(content);
+  const body = fm ? fm.body : content;
 
   if (fm) {
     for (const t of parseFrontmatterTags(fm.block)) {

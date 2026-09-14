@@ -9,7 +9,7 @@ export function formatShortcut(binding: ShortcutBinding): string {
   if (binding.shift) parts.push(isMac ? "⇧" : "Shift");
   if (binding.alt) parts.push(isMac ? "⌥" : "Alt");
   parts.push(displayKey(binding.key));
-  return parts.join(isMac ? "" : "+");
+  return parts.join(isMac ? " " : "+");
 }
 
 function displayKey(key: string): string {

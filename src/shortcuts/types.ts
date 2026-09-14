@@ -3,9 +3,11 @@ export type ActionId =
   | "newNote"
   | "openVault"
   | "saveNote"
-  | "openShortcutManager"
+  | "openSettings"
   | "toggleSidebar"
-  | "search";
+  | "search"
+  | "goBack"
+  | "goForward";
 
 export interface ShortcutBinding {
   key: string;

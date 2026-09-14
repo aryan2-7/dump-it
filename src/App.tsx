@@ -1,22 +1,27 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { MarkdownEditor } from "./components/MarkdownEditor";
 import { MarkdownPreview } from "./components/MarkdownPreview";
 import { Toolbar } from "./components/Toolbar";
 import { ResizeHandle } from "./components/ResizeHandle";
-import { NewNoteDialog, ShortcutManager } from "./components/ShortcutManager";
+import { NewNoteDialog } from "./components/ShortcutManager";
+import { SettingsModal } from "./components/SettingsModal";
 import { SearchModal } from "./components/SearchModal";
 import { useVault } from "./hooks/useVault";
 import { useLayout } from "./hooks/useLayout";
 import { useShortcuts } from "./hooks/useShortcuts";
+import { useTheme } from "./hooks/useTheme";
 import { buildTagIndex } from "./utils/tags";
+import { findBacklinks } from "./utils/wikiLinks";
 import "./App.css";
 
 function App() {
   const splitRef = useRef<HTMLDivElement>(null);
   const [showNewNote, setShowNewNote] = useState(false);
-  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+
+  const { theme, setTheme } = useTheme();
 
   const {
     vaultPath,
@@ -28,9 +33,13 @@ function App() {
     content,
     loading,
     isDirty,
+    canGoBack,
+    canGoForward,
     openVault,
     switchVault,
     openFile,
+    goBack,
+    goForward,
     updateContent,
     createFile,
     saveNow,
@@ -53,14 +62,43 @@ function App() {
     saveNote: saveNow,
     openVault,
     toggleSidebar,
-    openShortcutManager: () => setShowShortcuts(true),
+    openSettings: () => setShowSettings((v) => !v),
     search: () => setShowSearch(true),
+    goBack,
+    goForward,
   });
 
   const tagIndex = useMemo(
     () => buildTagIndex(flatFiles, fileContents),
     [flatFiles, fileContents],
   );
+
+  const activeFlatFile = useMemo(
+    () => (activeFile ? flatFiles.find((f) => f.path === activeFile) ?? null : null),
+    [activeFile, flatFiles],
+  );
+
+  const backlinks = useMemo(
+    () => findBacklinks(activeFlatFile, flatFiles, fileContents),
+    [activeFlatFile, flatFiles, fileContents],
+  );
+
+  // Esc closes whichever dialog/modal is open. (The shortcut manager's own
+  // key-recording capture-phase listener runs first and stops propagation,
+  // so this only fires when it isn't actively recording a binding.)
+  useEffect(() => {
+    if (!showNewNote && !showSettings && !showSearch) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setShowNewNote(false);
+      setShowSettings(false);
+      setShowSearch(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [showNewNote, showSettings, showSearch]);
 
   const handleCreateNote = async (name: string) => {
     setShowNewNote(false);
@@ -82,10 +120,12 @@ function App() {
           <Sidebar
             width={sidebarWidth}
             vaultPath={vaultPath}
+            recentVaults={recentVaults}
             tree={tree}
             activeFile={activeFile}
             tagIndex={tagIndex}
             onOpenVault={openVault}
+            onSwitchVault={switchVault}
             onSelectFile={openFile}
             onNewNote={() => setShowNewNote(true)}
           />
@@ -99,10 +139,14 @@ function App() {
         <Toolbar
           previewOpen={previewOpen}
           shortcuts={shortcuts}
+          canGoBack={canGoBack}
+          canGoForward={canGoForward}
+          onGoBack={goBack}
+          onGoForward={goForward}
           onTogglePreview={togglePreview}
           onNewNote={() => vaultPath && setShowNewNote(true)}
           onOpenSearch={() => setShowSearch(true)}
-          onOpenShortcuts={() => setShowShortcuts(true)}
+          onOpenSettings={() => setShowSettings((v) => !v)}
         />
 
         <div className="split-view" ref={splitRef}>
@@ -130,6 +174,7 @@ function App() {
                 <MarkdownPreview
                   content={content}
                   files={flatFiles}
+                  backlinks={backlinks}
                   onWikiLinkClick={openFile}
                 />
               </div>
@@ -145,12 +190,14 @@ function App() {
         />
       )}
 
-      {showShortcuts && (
-        <ShortcutManager
+      {showSettings && (
+        <SettingsModal
           shortcuts={shortcuts}
-          onChange={setShortcuts}
-          onReset={resetShortcuts}
-          onClose={() => setShowShortcuts(false)}
+          onChangeShortcuts={setShortcuts}
+          onResetShortcuts={resetShortcuts}
+          theme={theme}
+          onChangeTheme={setTheme}
+          onClose={() => setShowSettings(false)}
         />
       )}
 

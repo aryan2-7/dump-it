@@ -27,14 +27,24 @@ export const SHORTCUT_ACTIONS: ShortcutAction[] = [
     description: "Show or hide the file tree sidebar",
   },
   {
-    id: "openShortcutManager",
-    label: "Shortcut Manager",
-    description: "Open the keyboard shortcuts settings",
+    id: "openSettings",
+    label: "Settings",
+    description: "Open settings (keyboard shortcuts & themes)",
   },
   {
     id: "search",
     label: "Search",
     description: "Search notes across this vault or all vaults",
+  },
+  {
+    id: "goBack",
+    label: "Go Back",
+    description: "Navigate to the previously opened note",
+  },
+  {
+    id: "goForward",
+    label: "Go Forward",
+    description: "Navigate to the next note in history",
   },
 ];
 
@@ -42,10 +52,12 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
   togglePreview: { key: "p", mod: true, shift: false, alt: false },
   newNote: { key: "n", mod: true, shift: false, alt: false },
   saveNote: { key: "s", mod: true, shift: false, alt: false },
-  openVault: { key: "o", mod: true, shift: true, alt: false },
+  openVault: { key: "o", mod: true, shift: false, alt: false },
   toggleSidebar: { key: "b", mod: true, shift: false, alt: false },
-  openShortcutManager: { key: ",", mod: true, shift: false, alt: false },
-  search: { key: "f", mod: true, shift: true, alt: false },
+  openSettings: { key: ",", mod: true, shift: false, alt: false },
+  search: { key: "f", mod: true, shift: false, alt: false },
+  goBack: { key: "[", mod: true, shift: false, alt: false },
+  goForward: { key: "]", mod: true, shift: false, alt: false },
 };
 
 export const SHORTCUTS_STORAGE_KEY = "dump-it-shortcuts";

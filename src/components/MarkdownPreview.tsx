@@ -1,17 +1,23 @@
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { FlatFile } from "../types";
 import { hasScheme, preprocessWikiLinks, resolveWikiLink } from "../utils/wikiLinks";
+import { extractFrontmatter, parseFrontmatterFields, parseFrontmatterTags } from "../utils/frontmatter";
 
 interface MarkdownPreviewProps {
   content: string;
   files: FlatFile[];
+  backlinks: FlatFile[];
   onWikiLinkClick: (path: string) => void;
 }
 
-export function MarkdownPreview({ content, files, onWikiLinkClick }: MarkdownPreviewProps) {
-  const processed = preprocessWikiLinks(content);
+export function MarkdownPreview({ content, files, backlinks, onWikiLinkClick }: MarkdownPreviewProps) {
+  const fm = extractFrontmatter(content);
+  const body = fm ? fm.body : content;
+  const fields = fm ? parseFrontmatterFields(fm.block) : [];
+  const tags = fm ? parseFrontmatterTags(fm.block) : [];
+  const processed = preprocessWikiLinks(body);
 
   return (
     <div className="preview-pane">
@@ -19,8 +25,32 @@ export function MarkdownPreview({ content, files, onWikiLinkClick }: MarkdownPre
         <span className="pane-title preview-label">Preview</span>
       </div>
       <div className="markdown-preview">
+        {(fields.length > 0 || tags.length > 0) && (
+          <div className="note-properties">
+            {fields.map(([key, value]) => (
+              <div className="note-property" key={key}>
+                <span className="note-property-key">{key}</span>
+                <span className="note-property-value">{value}</span>
+              </div>
+            ))}
+            {tags.length > 0 && (
+              <div className="note-property">
+                <span className="note-property-key">tags</span>
+                <span className="note-property-value note-property-tags">
+                  {tags.map((tag) => (
+                    <span className="tag-chip" key={tag}>
+                      #{tag}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          urlTransform={(url) => (url.startsWith("wiki://") ? url : defaultUrlTransform(url))}
           components={{
             a: ({ href, children }) => {
               if (!href) return <span>{children}</span>;
@@ -98,6 +128,25 @@ export function MarkdownPreview({ content, files, onWikiLinkClick }: MarkdownPre
         >
           {processed}
         </ReactMarkdown>
+
+        {backlinks.length > 0 && (
+          <div className="backlinks-panel">
+            <div className="backlinks-title">Backlinks ({backlinks.length})</div>
+            <div className="backlinks-list">
+              {backlinks.map((f) => (
+                <button
+                  key={f.path}
+                  type="button"
+                  className="wiki-link backlink-item"
+                  onClick={() => onWikiLinkClick(f.path)}
+                  title={f.path}
+                >
+                  {f.name.replace(/\.md$/i, "")}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

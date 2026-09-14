@@ -9,6 +9,11 @@ const VAULT_KEY = "dump-it-vault-path";
 const RECENT_VAULTS_KEY = "dump-it-recent-vaults";
 const MAX_RECENT_VAULTS = 8;
 
+interface NavState {
+  stack: string[];
+  index: number;
+}
+
 function loadRecentVaults(): string[] {
   try {
     const raw = localStorage.getItem(RECENT_VAULTS_KEY);
@@ -33,6 +38,22 @@ export function useVault() {
   const [fileContents, setFileContents] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Back/forward navigation history, similar to a browser. Kept in a ref so
+  // reads are always fresh, mirrored into state so the UI can react to it.
+  const navRef = useRef<NavState>({ stack: [], index: -1 });
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [canGoForward, setCanGoForward] = useState(false);
+
+  const syncNavState = useCallback(() => {
+    setCanGoBack(navRef.current.index > 0);
+    setCanGoForward(navRef.current.index < navRef.current.stack.length - 1);
+  }, []);
+
+  const resetNav = useCallback(() => {
+    navRef.current = { stack: [], index: -1 };
+    syncNavState();
+  }, [syncNavState]);
 
   const addRecentVault = useCallback((path: string) => {
     setRecentVaults((prev) => {
@@ -74,10 +95,11 @@ export function useVault() {
       setActiveFile(null);
       setContent("");
       setSavedContent("");
+      resetNav();
     } finally {
       setLoading(false);
     }
-  }, [flushSave, refreshTree, addRecentVault]);
+  }, [flushSave, refreshTree, addRecentVault, resetNav]);
 
   const switchVault = useCallback(
     async (path: string) => {
@@ -93,15 +115,16 @@ export function useVault() {
         setActiveFile(null);
         setContent("");
         setSavedContent("");
+        resetNav();
       } finally {
         setLoading(false);
       }
     },
-    [vaultPath, flushSave, refreshTree, addRecentVault],
+    [vaultPath, flushSave, refreshTree, addRecentVault, resetNav],
   );
 
   const openFile = useCallback(
-    async (path: string) => {
+    async (path: string, opts?: { skipHistory?: boolean }) => {
       if (path === activeFile) return;
 
       await flushSave();
@@ -112,12 +135,38 @@ export function useVault() {
         setActiveFile(path);
         setContent(text);
         setSavedContent(text);
+
+        if (!opts?.skipHistory) {
+          const { stack, index } = navRef.current;
+          const trimmed = stack.slice(0, index + 1);
+          trimmed.push(path);
+          navRef.current = { stack: trimmed, index: trimmed.length - 1 };
+          syncNavState();
+        }
       } finally {
         setLoading(false);
       }
     },
-    [activeFile, flushSave],
+    [activeFile, flushSave, syncNavState],
   );
+
+  const goBack = useCallback(async () => {
+    const { stack, index } = navRef.current;
+    if (index <= 0) return;
+    const newIndex = index - 1;
+    navRef.current = { stack, index: newIndex };
+    syncNavState();
+    await openFile(stack[newIndex], { skipHistory: true });
+  }, [openFile, syncNavState]);
+
+  const goForward = useCallback(async () => {
+    const { stack, index } = navRef.current;
+    if (index >= stack.length - 1) return;
+    const newIndex = index + 1;
+    navRef.current = { stack, index: newIndex };
+    syncNavState();
+    await openFile(stack[newIndex], { skipHistory: true });
+  }, [openFile, syncNavState]);
 
   const updateContent = useCallback(
     (value: string) => {
@@ -222,9 +271,13 @@ export function useVault() {
     content,
     loading,
     isDirty,
+    canGoBack,
+    canGoForward,
     openVault,
     switchVault,
     openFile,
+    goBack,
+    goForward,
     updateContent,
     createFile,
     saveNow: flushSave,

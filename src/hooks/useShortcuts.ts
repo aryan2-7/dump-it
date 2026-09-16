@@ -43,7 +43,7 @@ export function useShortcuts(actions: Partial<Record<ActionId, () => void>>) {
         const action = actionsRef.current[id];
         if (!action) continue;
 
-        if (isEditable && id !== "saveNote" && id !== "togglePreview" && id !== "search") continue;
+        if (isEditable && !binding.mod && !binding.alt) continue;
 
         e.preventDefault();
         action();

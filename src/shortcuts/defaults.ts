@@ -46,6 +46,16 @@ export const SHORTCUT_ACTIONS: ShortcutAction[] = [
     label: "Go Forward",
     description: "Navigate to the next note in history",
   },
+  {
+    id: "toggleGraph",
+    label: "Toggle Graph",
+    description: "Switch between the editor and note graph",
+  },
+  {
+    id: "openDailyNote",
+    label: "Open Daily Note",
+    description: "Open or create today's note",
+  },
 ];
 
 export const DEFAULT_SHORTCUTS: ShortcutMap = {
@@ -58,6 +68,8 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
   search: { key: "f", mod: true, shift: false, alt: false },
   goBack: { key: "[", mod: true, shift: false, alt: false },
   goForward: { key: "]", mod: true, shift: false, alt: false },
+  toggleGraph: { key: "g", mod: true, shift: false, alt: false },
+  openDailyNote: { key: "d", mod: true, shift: false, alt: false },
 };
 
 export const SHORTCUTS_STORAGE_KEY = "dump-it-shortcuts";

@@ -93,6 +93,48 @@ body {
   letter-spacing: -0.02em;
 }
 
+.sidebar-logo-btn {
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 5px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.sidebar-logo-btn:hover .sidebar-logo {
+  filter: brightness(1.25);
+}
+
+/* Slim rail shown while the sidebar is hidden — click to bring it back. */
+.sidebar-ribbon {
+  width: 18px;
+  flex-shrink: 0;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg-sidebar);
+  color: var(--text-faint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-ribbon svg {
+  display: block;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.sidebar-ribbon:hover {
+  color: var(--accent);
+}
+
+.sidebar-ribbon:hover svg {
+  transform: translateX(1px);
+}
+
 /* ── Vault switcher ── */
 
 .vault-switcher {
@@ -103,8 +145,15 @@ body {
 }
 
 .btn-vault-menu {
-  padding: 4px 6px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  line-height: 0;
+}
+
+.btn-vault-menu svg {
+  display: block;
 }
 
 .vault-menu {
@@ -166,22 +215,29 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.btn-new-note {
-  width: 26px;
-  height: 26px;
+.btn-icon-action {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg-hover);
-  color: var(--text);
-  font-size: 16px;
-  line-height: 1;
+  color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-.btn-new-note:hover {
+.btn-icon-action svg {
+  display: block;
+}
+
+.btn-icon-action:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: var(--bg-active);
 }
 
 .sidebar-empty-state {
@@ -307,6 +363,15 @@ body {
   color: var(--text);
 }
 
+.tree-item.folder-selected {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.tree-item.folder-selected .tree-icon {
+  color: var(--accent);
+}
+
 .tree-icon {
   font-size: 10px;
   width: 12px;
@@ -321,6 +386,234 @@ body {
 
 .tree-folder-label {
   font-weight: 500;
+}
+
+/* ── Phase 3 organization ── */
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: 5px;
+}
+
+.tree-row .tree-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-marker {
+  margin-left: auto;
+  color: var(--text-faint);
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tree-marker.is-on {
+  color: var(--accent);
+}
+
+.tree-marker + .tree-marker {
+  margin-left: 0;
+}
+
+.tree-actions {
+  display: none;
+  gap: 1px;
+  padding-right: 7px;
+}
+
+.tree-row:hover .tree-actions,
+.tree-row:focus-within .tree-actions {
+  display: flex;
+}
+
+.tree-actions button {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.tree-actions button svg {
+  display: block;
+}
+
+.tree-actions button:hover {
+  background: var(--bg-active);
+  color: var(--accent);
+}
+
+.tree-actions button.is-on {
+  color: var(--accent);
+}
+
+/* Row-action tooltips open to the left so they stay inside the sidebar. */
+.tree-actions .icon-tooltip::after {
+  top: 50%;
+  right: calc(100% + 8px);
+  transform: translateY(-50%) translateX(4px);
+}
+
+.tree-actions .icon-tooltip:hover::after,
+.tree-actions .icon-tooltip:focus-visible::after {
+  transform: translateY(-50%) translateX(0);
+}
+
+.move-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 10px 0;
+  padding: 7px 10px;
+  border: 1px solid var(--wiki-unresolved);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--wiki-unresolved) 12%, transparent);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.move-error button {
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+
+.move-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.move-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.move-item:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.move-item:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.move-item-icon {
+  color: var(--text-faint);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.move-item-tag {
+  margin-left: auto;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.tree-node.drop-target > .tree-row {
+  border-color: var(--accent);
+  background: var(--bg-hover);
+}
+
+.tree-empty-folder {
+  margin: 3px 12px 5px 28px;
+  padding: 5px 8px;
+  border: 1px dashed var(--border);
+  border-radius: 5px;
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.tree-empty-folder.drop-target {
+  border-color: var(--accent);
+  border-style: solid;
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.saved-notes-section {
+  margin-bottom: 7px;
+  padding: 3px 5px 7px;
+  border-bottom: 1px solid var(--border);
+}
+
+.saved-notes-heading {
+  padding: 4px 9px;
+  color: var(--text-faint);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.saved-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 5px 9px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.saved-note span {
+  color: var(--accent);
+  font-size: 8px;
+}
+
+.saved-note:hover,
+.saved-note.active {
+  background: var(--bg-active);
+  color: var(--text);
+}
+
+.bookmark-list {
+  border-bottom: none;
 }
 
 /* ── Tags ── */
@@ -505,6 +798,399 @@ body.is-resizing {
   color: var(--text-muted);
 }
 
+/* ── Graph view ── */
+
+.graph-view {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  background: radial-gradient(circle at center, var(--bg-hover), var(--bg-base) 65%);
+}
+
+.graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-sidebar);
+}
+
+.graph-header > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.graph-header span {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.graph-header input {
+  width: 180px;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  background: var(--bg-base);
+  color: var(--text);
+}
+
+.graph-header input:focus {
+  border-color: var(--accent);
+}
+
+.graph-canvas {
+  flex: 1;
+  min-height: 0;
+  padding: 12px;
+}
+
+.graph-canvas svg {
+  width: 100%;
+  height: 100%;
+}
+
+.graph-edges line {
+  stroke: var(--text-faint);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.graph-nodes g {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.15s;
+}
+
+.graph-nodes circle {
+  fill: var(--wiki-link);
+  stroke: var(--bg-base);
+  stroke-width: 3;
+}
+
+.graph-nodes text {
+  fill: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  paint-order: stroke;
+  stroke: var(--bg-base);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.graph-nodes g:hover circle,
+.graph-nodes g:focus circle,
+.graph-nodes g.active circle {
+  fill: var(--accent-hover);
+  stroke: var(--accent);
+}
+
+.graph-nodes g:hover text,
+.graph-nodes g.active text {
+  fill: var(--text);
+  font-weight: 700;
+}
+
+.graph-nodes g.dimmed {
+  opacity: 0.15;
+}
+
+.graph-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.graph-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.graph-canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  padding: 0;
+}
+
+.graph-canvas-wrap canvas {
+  display: block;
+  outline: none;
+  cursor: default;
+}
+
+.graph-canvas-wrap canvas:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+/* ── Graph settings (Settings → Graph) ── */
+
+.graph-settings {
+  padding-bottom: 20px;
+}
+
+.graph-settings-heading {
+  margin: 18px 20px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.graph-settings .modal-hint {
+  padding-top: 4px;
+}
+
+.graph-settings-note {
+  margin: 0 20px;
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.graph-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 20px;
+}
+
+.graph-setting-label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-base);
+  padding: 2px;
+}
+
+.stepper-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.stepper-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.stepper-value {
+  min-width: 52px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.graph-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 20px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.switch {
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-base);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.switch:hover {
+  border-color: var(--accent);
+}
+
+.switch.on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.switch.on .switch-knob {
+  transform: translateX(14px);
+  background: var(--accent-ink);
+}
+
+.graph-settings .group-add {
+  margin: 4px 20px 0;
+}
+
+.graph-settings .group-row {
+  margin: 6px 20px 0;
+}
+
+.graph-settings .field-label {
+  padding-top: 8px;
+}
+
+.group-add {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.group-add input[type="text"],
+.group-add input:not([type]) {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-base);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.group-add input[type="color"] {
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-base);
+  cursor: pointer;
+}
+
+.group-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.group-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.group-query {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.context-menu {
+  z-index: 60;
+  min-width: 160px;
+  max-width: 260px;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.context-menu-title {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+
+.context-menu-note {
+  padding: 2px 10px 6px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.context-menu button:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.context-menu button.danger {
+  color: var(--wiki-unresolved);
+}
+
+.context-menu button.danger:hover {
+  background: var(--bg-hover);
+  color: var(--wiki-unresolved);
+}
+
+.graph-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+}
+
 /* ── Modals ── */
 
 .modal-overlay {
@@ -544,6 +1230,12 @@ body.is-resizing {
   padding: 12px 20px 0;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.modal-hint-tight {
+  padding-top: 4px;
+  margin-bottom: 3px;
+  line-height: 1.4;
 }
 
 .modal-error {
@@ -779,6 +1471,21 @@ body.is-resizing {
 .settings-panel-header h3 {
   font-size: 14px;
   font-weight: 600;
+}
+
+.daily-settings {
+  padding-bottom: 20px;
+}
+
+.daily-settings code {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.daily-settings select.field-input,
+.new-note-dialog select.field-input {
+  appearance: auto;
 }
 
 /* ── Theme picker ── */

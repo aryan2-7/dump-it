@@ -4,6 +4,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import type { FileEntry, FlatFile } from "../types";
 import { flattenFiles } from "../utils/wikiLinks";
 import { joinPath, parentDir, sanitizeFileName } from "../utils/paths";
+import { applyTemplate, formatLocalDate } from "../utils/templates";
 
 const VAULT_KEY = "dump-it-vault-path";
 const RECENT_VAULTS_KEY = "dump-it-recent-vaults";
@@ -183,7 +184,7 @@ export function useVault() {
   );
 
   const createFile = useCallback(
-    async (name: string, folderPath?: string) => {
+    async (name: string, folderPath?: string, templateContent?: string) => {
       if (!vaultPath) return null;
 
       await flushSave();
@@ -192,7 +193,9 @@ export function useVault() {
       const dir = folderPath ?? (activeFile ? parentDir(activeFile) : vaultPath);
       const path = joinPath(dir, `${sanitized}.md`);
       const title = sanitized.replace(/-/g, " ");
-      const initial = `# ${title}\n\n`;
+      const initial = templateContent === undefined
+        ? `# ${title}\n\n`
+        : applyTemplate(templateContent, title);
 
       setLoading(true);
       try {
@@ -206,6 +209,98 @@ export function useVault() {
     },
     [vaultPath, activeFile, flushSave, refreshTree, openFile],
   );
+
+  const createFolder = useCallback(async (name: string, parentPath?: string) => {
+    if (!vaultPath) return null;
+    const folderName = sanitizeFileName(name);
+    const path = joinPath(parentPath ?? vaultPath, folderName);
+    setLoading(true);
+    try {
+      const created = await invoke<string>("create_directory", { path });
+      await refreshTree(vaultPath);
+      return created;
+    } finally {
+      setLoading(false);
+    }
+  }, [vaultPath, refreshTree]);
+
+  const moveEntry = useCallback(async (sourcePath: string, destinationDir: string) => {
+    if (!vaultPath || parentDir(sourcePath) === destinationDir) return sourcePath;
+    await flushSave();
+    setLoading(true);
+    try {
+      const movedPath = await invoke<string>("move_entry", {
+        sourcePath,
+        destinationDir,
+      });
+      const remap = (path: string) =>
+        path === sourcePath || path.startsWith(`${sourcePath}/`) || path.startsWith(`${sourcePath}\\`)
+          ? movedPath + path.slice(sourcePath.length)
+          : path;
+      navRef.current = {
+        ...navRef.current,
+        stack: navRef.current.stack.map(remap),
+      };
+      syncNavState();
+      if (activeFile) {
+        const nextActive = remap(activeFile);
+        if (nextActive !== activeFile) setActiveFile(nextActive);
+      }
+      await refreshTree(vaultPath);
+      return movedPath;
+    } finally {
+      setLoading(false);
+    }
+  }, [vaultPath, activeFile, flushSave, refreshTree, syncNavState]);
+
+  const deleteEntry = useCallback(async (targetPath: string) => {
+    if (!vaultPath) return;
+    const affectsActive = activeFile !== null && (
+      activeFile === targetPath ||
+      activeFile.startsWith(`${targetPath}/`) ||
+      activeFile.startsWith(`${targetPath}\\`)
+    );
+    // Don't persist unsaved changes for a note that's being deleted.
+    if (!affectsActive) await flushSave();
+    setLoading(true);
+    try {
+      await invoke("delete_entry", { path: targetPath, vaultPath });
+      if (affectsActive) {
+        setActiveFile(null);
+        setContent("");
+        setSavedContent("");
+      }
+      const isGone = (path: string) =>
+        path === targetPath ||
+        path.startsWith(`${targetPath}/`) ||
+        path.startsWith(`${targetPath}\\`);
+      const stack = navRef.current.stack.filter((path) => !isGone(path));
+      navRef.current = {
+        stack,
+        index: Math.min(navRef.current.index, stack.length - 1),
+      };
+      syncNavState();
+      await refreshTree(vaultPath);
+    } finally {
+      setLoading(false);
+    }
+  }, [vaultPath, activeFile, flushSave, refreshTree, syncNavState]);
+
+  const openDailyNote = useCallback(async (    dailyFolder: string,
+    templatePath?: string,
+  ) => {
+    if (!vaultPath) return null;
+    const title = formatLocalDate();
+    const folder = dailyFolder.trim() ? joinPath(vaultPath, dailyFolder.trim()) : vaultPath;
+    const path = joinPath(folder, `${title}.md`);
+    const existing = flatFiles.find((file) => file.path === path);
+    if (existing) {
+      await openFile(existing.path);
+      return existing.path;
+    }
+    const template = templatePath ? fileContents[templatePath] : undefined;
+    return createFile(title, folder, template ?? `# {{date}}\n\n`);
+  }, [vaultPath, flatFiles, fileContents, openFile, createFile]);
 
   const isDirty = content !== savedContent;
 
@@ -280,6 +375,10 @@ export function useVault() {
     goForward,
     updateContent,
     createFile,
+    createFolder,
+    moveEntry,
+    deleteEntry,
+    openDailyNote,
     saveNow: flushSave,
     refreshTree,
   };

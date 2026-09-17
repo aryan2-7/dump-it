@@ -14,10 +14,12 @@ make sure u have tauri installed tho
 ## demo screenshot
 
 - Default Theme
-<img width="1392" height="912" alt="image" src="https://github.com/user-attachments/assets/4634b445-662d-4156-8c67-b93e66c05208" />
+<img width="1392" height="912" alt="image" src="https://github.com/user-attachments/assets/bff7bdc4-0ff0-426f-94de-01364fc09c7e" />
+
 
 - Gruvbox Theme
-<img width="1392" height="912" alt="image" src="https://github.com/user-attachments/assets/da388cb3-d1da-4f0c-ab4f-fc8e473082b5" />
+<img width="1392" height="912" alt="image" src="https://github.com/user-attachments/assets/40e1a2a4-7779-4d60-ae79-a070b7db7aa8" />
+
 
 
 

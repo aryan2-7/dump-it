@@ -62,7 +62,46 @@ export function PaletteIcon({ size = 15 }: IconProps) {
   );
 }
 
-export function RevealIcon({ size = 15 }: IconProps) {
+export function RevealIcon({ size = 15 }: IconProps) {  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 7.5a2 2 0 0 1 2-2h3.5l1.6 1.8H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
+  );
+}
+
+export function GraphIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="6" cy="6" r="2.4" />
+      <circle cx="18" cy="8" r="2.4" />
+      <circle cx="10" cy="18" r="2.4" />
+      <circle cx="18.5" cy="17.5" r="2.4" />
+      <path d="M8 7l7.6.7M7 8.2l2 7.4M12 17.4l4.4-.4M16.4 9.8l1.4 5.4" />
+    </svg>
+  );
+}
+
+export function FolderPlusIcon({ size = 15 }: IconProps) {
   return (
     <svg
       width={size}
@@ -76,6 +115,139 @@ export function RevealIcon({ size = 15 }: IconProps) {
       aria-hidden="true"
     >
       <path d="M3 7.5a2 2 0 0 1 2-2h3.5l1.6 1.8H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <path d="M12 11.5v5M9.5 14h5" />
+    </svg>
+  );
+}
+
+export function FilePlusIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 2.5h8L19 8v13.5a.5.5 0 0 1-.5.5h-12a.5.5 0 0 1-.5-.5z" />
+      <path d="M13.5 2.5V8H19" />
+      <path d="M12 12.5v5M9.5 15h5" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 9.5l6 6 6-6" />
+    </svg>
+  );
+}
+
+export function ChevronRightIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9.5 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function MoveIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3v9" />
+      <path d="M8.5 8.5L12 12l3.5-3.5" />
+      <path d="M4 14v6a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6" />
+    </svg>
+  );
+}
+
+export function PinIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 4h6l1 7 3 3v2H5v-2l3-3z" />
+      <path d="M12 16v5" />
+    </svg>
+  );
+}
+
+export function BookmarkIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M7 3.5h10a.5.5 0 0 1 .5.5v16l-5.5-3.8L6.5 20V4a.5.5 0 0 1 .5-.5z" />
+    </svg>
+  );
+}
+
+export function CalendarIcon({ size = 15 }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+      <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" />
     </svg>
   );
 }

@@ -4,26 +4,34 @@ import { SettingsIcon } from "./icons";
 
 interface ToolbarProps {
   previewOpen: boolean;
+  editorOpen: boolean;
+  graphOpen: boolean;
   shortcuts: ShortcutMap;
   canGoBack: boolean;
   canGoForward: boolean;
   onGoBack: () => void;
   onGoForward: () => void;
   onTogglePreview: () => void;
-  onNewNote: () => void;
+  onToggleEditor: () => void;
+  onToggleGraph: () => void;
+  onOpenDailyNote: () => void;
   onOpenSearch: () => void;
   onOpenSettings: () => void;
 }
 
 export function Toolbar({
   previewOpen,
+  editorOpen,
+  graphOpen,
   shortcuts,
   canGoBack,
   canGoForward,
   onGoBack,
   onGoForward,
   onTogglePreview,
-  onNewNote,
+  onToggleEditor,
+  onToggleGraph,
+  onOpenDailyNote,
   onOpenSearch,
   onOpenSettings,
 }: ToolbarProps) {
@@ -49,21 +57,30 @@ export function Toolbar({
       >
         →
       </button>
+      <button type="button" className="toolbar-btn" onClick={onOpenDailyNote} title={`Open today's note (${formatShortcut(shortcuts.openDailyNote)})`}>
+        Today
+      </button>
+      <div className="toolbar-spacer" />
+      <button
+        type="button"
+        className={`toolbar-btn${editorOpen ? " active" : ""}`}
+        onClick={onToggleEditor}
+        title="Toggle editor pane"
+        disabled={graphOpen}
+      >
+        Editor
+      </button>
       <button
         type="button"
         className={`toolbar-btn${previewOpen ? " active" : ""}`}
         onClick={onTogglePreview}
         title={`Toggle preview (${formatShortcut(shortcuts.togglePreview)})`}
+        disabled={graphOpen}
       >
         Preview
       </button>
-      <button
-        type="button"
-        className="toolbar-btn"
-        onClick={onNewNote}
-        title={`New note (${formatShortcut(shortcuts.newNote)})`}
-      >
-        + New
+      <button type="button" className={`toolbar-btn${graphOpen ? " active" : ""}`} onClick={onToggleGraph} title={`Toggle graph (${formatShortcut(shortcuts.toggleGraph)})`}>
+        Graph
       </button>
       <button
         type="button"
@@ -73,7 +90,6 @@ export function Toolbar({
       >
         Search
       </button>
-      <div className="toolbar-spacer" />
       <button
         type="button"
         className="toolbar-btn toolbar-btn-icon icon-tooltip"

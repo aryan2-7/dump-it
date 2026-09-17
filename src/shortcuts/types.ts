@@ -7,7 +7,9 @@ export type ActionId =
   | "toggleSidebar"
   | "search"
   | "goBack"
-  | "goForward";
+  | "goForward"
+  | "toggleGraph"
+  | "openDailyNote";
 
 export interface ShortcutBinding {
   key: string;

@@ -6,6 +6,7 @@ import {
   formatShortcut,
 } from "../shortcuts/format";
 import type { ActionId, ShortcutMap } from "../shortcuts/types";
+import type { FlatFile } from "../types";
 
 interface KeyboardShortcutsPanelProps {
   shortcuts: ShortcutMap;
@@ -98,12 +99,16 @@ export function KeyboardShortcutsPanel({
 }
 
 interface NewNoteDialogProps {
-  onCreate: (name: string) => void;
+  templates: FlatFile[];
+  /** Folder the note will be created in — shown as a hint, vault root when null. */
+  locationHint?: string | null;
+  onCreate: (name: string, templatePath?: string) => void;
   onClose: () => void;
 }
 
-export function NewNoteDialog({ onCreate, onClose }: NewNoteDialogProps) {
+export function NewNoteDialog({ templates, locationHint, onCreate, onClose }: NewNoteDialogProps) {
   const [name, setName] = useState("");
+  const [templatePath, setTemplatePath] = useState("");
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -118,6 +123,7 @@ export function NewNoteDialog({ onCreate, onClose }: NewNoteDialogProps) {
         <label className="field-label" htmlFor="note-name">
           Note name
         </label>
+        {locationHint && <p className="modal-hint modal-hint-tight">Creates in: <strong>{locationHint}</strong></p>}
         <input
           id="note-name"
           className="field-input"
@@ -127,11 +133,23 @@ export function NewNoteDialog({ onCreate, onClose }: NewNoteDialogProps) {
           placeholder="My Note"
           onKeyDown={(e) => {
             if (e.key === "Enter" && name.trim()) {
-              onCreate(name.trim());
+              onCreate(name.trim(), templatePath || undefined);
             }
             if (e.key === "Escape") onClose();
           }}
         />
+
+        {templates.length > 0 && (
+          <>
+            <label className="field-label" htmlFor="note-template">Template</label>
+            <select id="note-template" className="field-input" value={templatePath} onChange={(event) => setTemplatePath(event.target.value)}>
+              <option value="">Blank note</option>
+              {templates.map((template) => (
+                <option key={template.path} value={template.path}>{template.name.replace(/\.md$/i, "")}</option>
+              ))}
+            </select>
+          </>
+        )}
 
         <div className="modal-footer">
           <button type="button" className="btn-ghost" onClick={onClose}>
@@ -141,7 +159,7 @@ export function NewNoteDialog({ onCreate, onClose }: NewNoteDialogProps) {
             type="button"
             className="btn-primary"
             disabled={!name.trim()}
-            onClick={() => onCreate(name.trim())}
+            onClick={() => onCreate(name.trim(), templatePath || undefined)}
           >
             Create
           </button>
